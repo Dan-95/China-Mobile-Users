@@ -1,0 +1,120 @@
+-------------Creat Table in the Database -----------------
+Create Table labelcategories(label_id VARCHAR PRIMARY KEY, category varchar)
+create table applabels (app_id varchar, label_id varchar, 
+						FOREIGN KEY (label_id) REFERENCES labelcategories(label_id));
+create table appevents (event_id varchar PRIMARY KEY, app_id varchar , is_installed varchar, is_active varchar,
+						FOREIGN KEY (app_id) REFERENCES applabels (app_id));
+create table phonebrand (device_id varchar PRIMARY KEY, phone_brand varchar, device_model varchar);
+create table trainingset (device_id varchar PRIMARY KEY, gender char, age integer, age_group varchar);
+create table events (event_id varchar PRIMARY KEY, device_id varchar, timestamps varchar, logitude numeric, 
+	laititude, numeric,FOREIGN KEY (device_id) REFERENCES Phonebrand(device)); 
+
+-------------Import data in the Database -----------------
+copy labelcategories from 'D:/CSV/label_categories.csv' 
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER FALSE);
+copy applabels from 'D:/CSV/app_labels.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER FALSE);
+copy appevents from 'D:/CSV/app_events.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER FALSE);
+copy phonebrand from 'D:/CSV/phone_brand_device_model.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER FALSE);
+copy trainingset from 'D:/CSV/gender_age_train.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER FALSE);
+copy events from 'D:/CSV/events.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER FALSE);
+
+-------- check duplicated records and number of records ------
+
+Select * from trainingset;
+
+Select device_id, gender, age, count(*) from trainingset
+	group by (device_id, gender, age)
+	having count(*) >= 2;
+	
+Select device_id,count(*) from trainingset
+	group by (device_id)
+	having count(*) >= 2;
+	
+Select * from phonebrand;
+
+select device_id, phone_brand, device_model, count(*) 
+	from phonebrand
+	group by (device_id, phone_brand, device_model)
+	having count(*) >= 2;
+
+select device_id, count(*)
+	from phonebrand
+	group by device_id
+	having count(*) >=2;
+
+select * from events;
+
+select event_id, device_id, timestamps,longitude, latitude, count(*)
+	from events
+	group by (event_id, device_id, timestamps,longitude, latitude)
+	having count(*) >=2;
+
+select device_id, timestamps,longitude, latitude, count(*)
+	from events
+	group by (device_id, timestamps,longitude, latitude)
+	having count(*) >= 2;
+
+select event_id, count(*)
+	from events
+	group by event_id
+	having count(*) >=2;
+
+select * from events where timestamps is NULL;
+
+----- join charts to prepare the analysis purpose spreadsheet -----
+select device_id, gender, age, age_group, phone_brand, device_model into step1 from
+(select t1.device_id, gender, age, age_group, phone_brand, device_model
+	from trainingset t1
+	left join phonebrand t2
+	on t1.device_id = t2.device_id
+	where t1.device_id is not NULL) t3;
+
+select device_id, gender, age, age_group, phone_brand, device_model,timestamps, longitude, latitude into finalchart
+	from (select t1.device_id, gender, age, age_group, phone_brand, device_model,timestamps, longitude, latitude 
+		from step1 t1
+		left join events t2
+		on t1.device_id = t2.device_id
+		where t1.device_id is not NULL) t3;
+
+--- check duplicated records and missing records ---
+select device_id, timestamps, gender,count(*) from finalchart
+	group by(device_id, timestamps, gender)
+	having (count(*) >= 2)
+	order by (count(*))
+	desc;
+
+select * from finalchart where timestamps is NULL;
+
+--- Remove duplicated records, abnormal, missing records---
+Delete from finalchart where timestamps is NULL;
+
+Select * into ChineseMobileUsers
+	from (Select distinct * from finalchart) t1;
+
+select * from ChineseMobileUsers;
+
+Delete from chinesemobileusers where device_id = 'device_id';
+
+----- Do some simple analysis--------
+select count(*) 
+	from chinesemobileusers;
+
+select gender, count(*) 
+	from chinesemobileusers group by gender; 
+
+select phone_brand, count(*) from chinesemobileusers
+	group by phone_brand
+	order by count(*)
+	desc;
+
+select phone_brand, device_model, count(*) from chinesemobileusers
+	group by phone_brand, device_model
+	order by count(*)
+	desc;
+
+
