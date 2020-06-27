@@ -33,12 +33,41 @@ Create tables in database for the importing purpose
 
 ```SQL
 --- Create tables in database for the importing purpose ---
-Create Table labelcategories(label_id varchar, category varchar);
-create table applabels (app_id varchar, label_id varchar);
-create table appevents (event_id varchar, app_id varchar , is_installed varchar, is_active varchar);
-create table phonebrand (device_id varchar, phone_brand varchar, device_model varchar);
-create table trainingset (device_id varchar, gender char, age integer, age_group varchar);
-create table events (event_id varchar, device_id varchar, timestamps varchar, longitude numeric, laititude numeric); 
+Create Table labelcategories(label_id numeric, category varchar);
+Create table applabels (app_id numeric, label_id numeric);
+Create table appevents (event_id numeric, app_id numeric , is_installed varchar, is_active varchar);
+Create table phonebrand (device_id numeric, phone_brand varchar, device_model varchar);
+Create table trainingset (device_id numeric, gender char, age integer, age_group varchar);
+Create table events (event_id numeric, device_id numeric, timestamps varchar, longitude numeric, laititude numeric); 
 
 ```
+Here is an execution successful screenshot:
+
+![Image of result](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/Create%20Table%20Example%20Result.png)
+
+Then we import the data into the empty table:
+
+```SQL
+-------------Import data in the Database -----------------
+copy labelcategories from 'D:/CSV/label_categories.csv' 
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER True);
+copy applabels from 'D:/CSV/app_labels.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER True);
+copy appevents from 'D:/CSV/app_events.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER True);
+copy phonebrand from 'D:/CSV/phone_brand_device_model.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER True);
+copy trainingset from 'D:/CSV/gender_age_train.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER True);
+copy events from 'D:/CSV/events.csv'
+	WITH (FORMAT CSV, ENCODING 'UTF8', DELIMITER ',', QUOTE '"', NULL '', HEADER True);
+
+```
+Here is an execution successful screenshot:
+
+![Image of result](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/Import%20Table%20Result.png)
+
+
+
+
 
