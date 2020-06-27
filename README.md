@@ -67,7 +67,9 @@ Here is an execution successful screenshot:
 
 ![Image of result](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/Import%20Table%20Result.png)
 
+After importing all raw data into the database, we'd like to build a relationship between each tables. Here is the Entity Relationship Diagram:
 
+![Image of ERD](https://github.com/Dan-95/China-Mobile-Users/blob/master/china_mobile_users%20EDR.png)
 
 
 
