@@ -67,9 +67,81 @@ Here is an execution successful screenshot:
 
 ![Image of result](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/Import%20Table%20Result.png)
 
-After importing all raw data into the database, we'd like to build a relationship between each tables. Here is the Entity Relationship Diagram:
+After importing all raw data into the database, we'd like to build a relationship between each tables. Here is the Entity Relationship Diagram(ERD):
 
 ![Image of ERD](https://github.com/Dan-95/China-Mobile-Users/blob/master/china_mobile_users%20EDR.png)
+
+Based on this ERD, we need to ensure the unique value for the primary Key. Also, it's necessary to check are there any missing/abnormal/null value.
+
+```SQL
+Select label_id, count(*) from labelcategories group by label_id having count(*) > 1;
+Select device_id, count(*) from phonebrand group by label_id having count(*) > 1;
+Select even_id, count(*) from events group by event_id having count(*) > 1; 
+
+```
+According to the result, there are 529 duplicated device_id in Table phonbrand 
+
+![Image of duplicated id](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/Duplicated%20records%201.png)
+
+We need to check duplicated records and decide whether we need to modify them or just delete them. By doing some inquiries, we found two types of duplicates:
+* Values are same in all columns (523 records)
+```SQL
+Select device_id, phone_brand, device_model, count(*) from phonebrand
+	Group by (device_id, phone_brand, device_model)
+	having count(*) > 1
+	order by device_id;
+```
+![Image_of_dulicated_id](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/type%201%20duplicated.png)
+
+* Values are same in device_id and phone_brand (6 records)
+```SQL
+Select * from 
+(select dense_rank() over ( PARTITION by device_id order by(phone_brand,device_model) desc),* from phonebrand) as t1
+where dense_rank > 1;
+```
+![Image_of_dulicated_id](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/type%202%20duplicated.png)
+
+Considering that in the real life, the device_id of the phone can only map one type of brand with the certain model. Therefore, we will remove all these duplicated records.
+```SQL
+
+Select * into storage1 from (Select * from 
+(select dense_rank() over ( PARTITION by device_id order by(phone_brand,device_model) desc),* from phonebrand) as t1
+where dense_rank = 1) as t2;
+
+select t1.device_id, t1.phone_brand,t1.device_model into storage2 
+	from (Select device_id, phone_brand, device_model, count(*) 
+		  from storage1
+		  Group by (device_id, phone_brand, device_model)
+		  having count(*) = 1
+		  order by device_id) as t1;
+
+select * into newphonebrand 
+	from (select * from storage2) as t1;
+```
+Then we got a clean phonebrand table:
+![Image_of_table](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/newphonebrand.png)
+
+Then could set primary key for these three tables
+```SQL
+
+ALTER TABLE newphonebrand
+  ADD CONSTRAINT device_id_pk 
+    PRIMARY KEY (device_id);
+	
+ALTER TABLE events
+  ADD CONSTRAINT event_id_pk 
+    PRIMARY KEY (event_id);	
+	
+ALTER TABLE labelcategories
+  ADD CONSTRAINT label_id_pk 
+    PRIMARY KEY (label_id);
+
+```
+We Successfully set up Primary Keys:
+
+![image_of_pk](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/PK.png)
+
+
 
 
 
