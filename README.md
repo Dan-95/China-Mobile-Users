@@ -207,7 +207,26 @@ Joined Success:
 
 ![image_of_chart](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/final_chart.png)
 
-After prodcuing this new tables, we need to do some examinations
+After producing this new tables, we need to do some examinations and polish.
+
+```SQL
+
+select * from finalchart where timestamps is NULL;
+
+Delete from finalchart where timestamps is null;
+
+Select device_id, timestamps, gender,count(*) from finalchart
+	group by(device_id, timestamps, gender)
+	having (count(*) >= 2)
+	order by (count(*))
+	desc;
+
+Select * into ChineseMobileUsers
+	from (Select distinct * from finalchart) t1;
+```
+Duplicated and Null results:
+
+![image of final dupliacted](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/duplicated%20records%20final.png)
 
 
-
+Now, we have already produced a polished data spreadsheet for further analysis.
