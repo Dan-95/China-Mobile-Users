@@ -38,7 +38,7 @@ Create table applabels (app_id numeric, label_id numeric);
 Create table appevents (event_id numeric, app_id numeric , is_installed varchar, is_active varchar);
 Create table phonebrand (device_id numeric, phone_brand varchar, device_model varchar);
 Create table trainingset (device_id numeric, gender char, age integer, age_group varchar);
-Create table events (event_id numeric, device_id numeric, timestamps varchar, longitude numeric, laititude numeric); 
+Create table events (event_id numeric, device_id numeric, timestamps varchar, longitude numeric, latitude numeric); 
 
 ```
 Here is an execution successful screenshot:
@@ -141,7 +141,73 @@ We Successfully set up Primary Keys:
 
 ![image_of_pk](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/PK.png)
 
+After doing these steps, Let's take a glance on some tables(Which will be used for joining):
 
+* events
+Check how many events happened in the same location, or at the same time.
+```SQL
+select longitude,latitude, count(*) from events
+	group by (longitude,latitude)
+	order by count(*) desc;
+	
+select timestamps, count(*) from events
+	group by (timestamps)
+	order by count(*) desc;
+```
+* trainingsets:
+Check the demographic in the sample of trainingsets (Age, gender, etc.) 
+
+```SQL
+select gender,count(*) from trainingset
+	group by gender;
+	
+select gender, round(avg(age),2) from trainingset
+	group by gender;
+	
+select gender, age_group, count(*) from trainingset
+	group by (gender, age_group)
+	order by count(*) desc;
+```
+
+* newphonebrand:
+Check the most popular brands, device_model
+
+```SQL
+select count (distinct(phone_brand)) from newphonebrand;
+
+Select phone_brand, count(*) from newphonebrand
+	group by phone_brand
+	order by count(*) desc
+	limit 10;
+
+Select phone_brand, device_model, count(*) from newphonebrand
+	group by phone_brand, device_model
+	order by count(*) desc
+	limit 10;
+```
+Start to prepare a new data spreadsheet (Join table)
+
+``` SQL 
+select device_id, gender, age, age_group, phone_brand, device_model into step1 from
+(select t1.device_id, gender, age, age_group, phone_brand, device_model
+	from trainingset t1
+	left join newphonebrand t2
+	on t1.device_id = t2.device_id
+	where t1.device_id is not NULL) t3;
+
+select device_id, gender, age, age_group, phone_brand, device_model,timestamps, longitude, latitude into finalchart
+	from (select t1.device_id, gender, age, age_group, phone_brand, device_model,timestamps, longitude, latitude 
+		from step1 t1
+		left join events t2
+		on t1.device_id = t2.device_id
+		where t1.device_id is not NULL) t3;
+
+```
+Joined Success:
+
+![image_of_chart](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/final_chart.png)
+
+After prodcuing this new tables, we need to do some examinations
 
 
 
