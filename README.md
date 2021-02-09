@@ -73,6 +73,8 @@ After importing all raw data into the database, we'd like to build a relationshi
 
 Based on this ERD, we need to ensure the unique value for the primary Key. Also, it's necessary to check are there any missing/abnormal/null value.
 
+Also, considering that there are two many to many relationship among there enities, we must add a transitive table to divide them into one to many relationship
+
 ```SQL
 Select label_id, count(*) from labelcategories group by label_id having count(*) > 1;
 Select device_id, count(*) from phonebrand group by label_id having count(*) > 1;
