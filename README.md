@@ -67,11 +67,11 @@ Here is an execution successful screenshot:
 
 ![Image of result](https://github.com/Dan-95/China-Mobile-Users/blob/master/results/Import%20Table%20Result.png)
 
-After importing all raw data into the database, we'd like to build a relationship between each tables. Here is the Entity Relationship Diagram(ERD):
+After importing all raw data into the database, we'd like to build a relationship diagram between each tables:
 
 ![Image of ERD](https://github.com/Dan-95/China-Mobile-Users/blob/master/china_mobile_users%20EDR.png)
 
-Based on this ERD, we need to ensure the unique value for the primary Key. Also, it's necessary to check are there any missing/abnormal/null value.
+Based on this graphic, we need to ensure the unique value for the primary Key. Also, it's necessary to check are there any missing/abnormal/null value.
 
 Also, considering that there are two many to many relationship among there enities, we must add a transitive table to divide them into one to many relationship
 
